@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gráfica de Barras Horizontales con D3.js</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        .bar {
+            fill: rgb(148, 173, 47);
+        }
+        .bar:hover {
+            fill: orange;
+        }
+        .label {
+            font-size: 10px;
+            font-family: sans-serif;
+            text-anchor: middle;
+        }
+    </style>
+</head>
+<body>
+    <svg width="600" height="400"></svg>
+    <script>
+        // Datos de ejemplo adaptados del código R2D3
+        var data = [
+            {label: "jan", y: 5000, x: 1},
+            {label: "feb", y: 2000, x: 2},
+            {label: "mar", y: 3000, x: 4},
+            {label: "apr", y: 4000, x: 5}
+        ];
+
+        // Configuración del SVG
+        var svg = d3.select("svg"),
+            margin = {top: 20, right: 30, bottom: 40, left: 40},
+            width = +svg.attr("width") - margin.left - margin.right,
+            height = +svg.attr("height") - margin.top - margin.bottom,
+            g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+        // Escala para el eje X (horizontal)
+        var x = d3.scaleLinear()
+            .domain([0, d3.max(data, function(d) { return d.y; })])
+            .range([0, width]);
+
+        // Escala para el eje Y (vertical)
+        var y = d3.scaleBand()
+            .domain(data.map(function(d) { return d.label; }))
+            .range([0, height])
+            .padding(0.1);
+
+        // Añadir barras horizontales
+        var bars = g.selectAll(".bar")
+            .data(data)
+            .enter().append("rect")
+            .attr("class", "bar")
+            .attr("x", 0)
+            .attr("y", function(d) { return y(d.label); })
+            .attr("width", function(d) { return x(d.y); })
+            .attr("height", y.bandwidth())
+            .attr("fill", "#009E73")
+            .attr("opacity", 0.5)
+            .attr("stroke", "white")
+            .attr("d", function(d) { return d.x; })
+            .on("click", function(d) {
+                console.log("Clicked bar:", d.label);
+                // Aquí podrías agregar lógica para manejar el evento de clic
+            })
+            .on("mouseenter", function() {
+                d3.select(this)
+                    .attr('opacity', 1)
+                    .attr('fill', '#ffb14e');
+            })
+            .on("mouseleave", function() {
+                d3.select(this)
+                    .attr('opacity', 0.5)
+                    .attr('fill', '#009E73');
+            });
+
+        // Etiquetas de identidad (labels)
+        var labels = g.selectAll(".label")
+            .data(data)
+            .enter().append("text")
+            .attr("class", "label")
+            .attr("x", function(d) { return x(d.y) + 10; }) // Ajustar posición x
+            .attr("y", function(d) { return y(d.label) + y.bandwidth() / 2; }) // Ajustar posición y
+            .text(function(d) { return d.label; })
+            .style("font-size", "10px")
+            .style("font-family", "sans-serif")
+            .attr("text-anchor", "middle");
+
+        // Etiquetas numéricas (totals)
+        var totals = g.selectAll(".totals")
+            .data(data)
+            .enter().append("text")
+            .attr("class", "totals")
+            .attr("x", function(d) { return x(d.y) + 10; }) // Ajustar posición x
+            .attr("y", function(d) { return y(d.label) + y.bandwidth() / 2 + 10; }) // Ajustar posición y
+            .text(function(d) { return d.y; })
+            .style("font-size", "10px")
+            .style("font-family", "sans-serif")
+            .attr("text-anchor", "middle");
+
+        // Título
+        svg.append("text")
+            .attr("x", width / 2)
+            .attr("y", margin.top / 2)
+            .style("font-size", "18px")
+            .style("font-family", "sans-serif")
+            .text("Total flights");
+
+        // Subtítulo
+        svg.append("text")
+            .attr("x", width / 2)
+            .attr("y", margin.top)
+            .attr("text-anchor", "middle")
+            .style("font-size", "12px")
+            .style("font-family", "sans-serif")
+            .text("Click on bar for details");
+
+    </script>
+</body>
+</html>
